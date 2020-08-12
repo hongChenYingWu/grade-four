@@ -1,0 +1,166 @@
+#include<iostream>
+using namespace std;
+/**************************************************/
+//自定义的顺序存储的字符串类型
+#define MAXSTRLEN 1000
+//串的存储结构采用顺序存储，定义了串的最大长度
+class String {
+    private:char* elem;
+    public:String() {
+		elem = new char[MAXSTRLEN + 1];
+		elem[0] = 0;//elem数组中第一个位置存放串的长度
+    }
+    String(const char a[]) {
+		//const不可省略，类型为字符串常量
+		 elem = new char[MAXSTRLEN + 1];
+		 elem[0] = 0;
+		 for (int i = 1; i <= strlen(a); i++) {
+			 elem[i] = a[i - 1];
+			 elem[0]++;
+		 }	
+    }
+	void getLine() {
+		//设置从键盘缓冲区输入字符串的方法
+		char c=getchar();
+		for (int i = 1;; i++) {
+			if (c == '\n') break;
+			elem[i] = c;
+			elem[0]++;
+			c = getchar();
+		}
+    }
+	void print() {
+		for (int i = 1; i <= elem[0]; i++) {
+			cout <<(char)elem[i];
+		}
+	}
+	void operator=(const String a) {
+		//对赋值运算符进行重载，为串赋值
+		for (int i = 0; i <= a.elem[0]; i++) {
+			elem[i] =a.elem[i];
+		}
+	}
+	bool operator==(const String a){
+		//判断两个串是否相等
+		for (int i = 0; i <=elem[0]; i++) {
+			if (elem[i] != a.elem[i]) return false;
+		}
+		return true;
+	}
+	bool operator!=(const String a) {
+		for (int i = 0; i <= elem[0]; i++) {
+			if (elem[i] != a.elem[i]) return true;
+		}
+		return false;
+	}
+	int size() {
+		return elem[0];
+	}
+	String operator+(const String a){
+		//将串a接到当前串的后面
+		String res;
+		if (elem[0] + a.elem[0] <= MAXSTRLEN) {
+			//未截断
+			for (int i = 1; i <= elem[0]; i++) {
+				res.elem[i] = elem[i];
+			}
+			for (int i = 1; i <= a.elem[0]; i++) {
+				res.elem[elem[0] + i] = a.elem[i];
+			}
+			res.elem[0] = elem[0] + a.elem[0];
+		}else if(elem[0]<MAXSTRLEN){
+			//将a串中多余的部分截断
+			for (int i = 0; i <=elem[0]; i++) {
+				res.elem[i] = elem[i];
+			}
+			for (int i = 1; i <= MAXSTRLEN-elem[0]; i++) {
+				res.elem[elem[0]+i] = a.elem[i];
+			}
+			res.elem[0] = MAXSTRLEN;
+		}else {
+			res = (*this);
+		}
+		return res;
+	}
+	String substr(int pos,int len) {
+		//截取并且返回从pos位置开始，长度为len的元素组成的串
+		String res;
+		for (int i = pos; i < pos + len; i++) {
+			res.elem[i-pos+1] = elem[i];
+		}
+		res.elem[0] = len;
+		return res;
+	}
+	int find(String t, int pos) {
+	//找出在pos位置后子串t出现的第一个字符的位置
+		int n = this->size(), m = t.size();
+		for (int i = pos; i <= n - m+1; i++) {
+			String sub = this->substr(i, m);
+			if (sub == t)  return i;
+		}
+		return -1;//若找不到要搜索的子串t则返回-1
+	}
+	int find(String t) {
+		int n = this->size(), m = t.size();
+		for (int i = 1; i <= n - m+1; i++) {
+			String sub = this->substr(i, m);
+			if (sub == t)  return i;
+		}
+		return -1;
+	}
+	void replace(int pos, int len, String a) {
+		//用串a中的元素代替当前串中从pos位置开始长度为len的元素
+		String t = a;
+		if (pos + len <= elem[0]) {
+			(*this) = this->substr(1, pos - 1) + t + this->substr(pos + len, elem[0] - pos - len + 1);
+		}
+		else {
+			(*this) = this->substr(1, pos - 1) + t;
+		}
+	}
+	void replace_all(String a, String b) {
+		//用串b代替所有当前串中出现的串a
+		int pos = 1;//避免重复搜索
+		while ((pos=this->find(a,pos))!=-1) {
+			//判断时用pos的值保存找到的位置，防止重头便利
+			this->replace(this->find(a), a.size(), b);
+			pos += b.size();
+		}
+	}
+	void insert(int pos, String a) {
+		//将串a中的元素插入当前串的pos位置之前
+		String t = a;
+		(*this) = this->substr(1, pos - 1) + t + this->substr(pos, elem[0] - pos + 1);
+	}
+	void insert_all(String a, String b) {
+		int pos = 1;
+		while ((pos=this->find(a, pos)) != -1) {
+			this->insert(this->find(a, pos), b);
+			pos=pos+a.size()+b.size();
+		}
+	}
+	void erase(int pos, int len) {
+		//将当前串中位置为pos，长度为len的元素给清除
+		if (pos + len <= elem[0]) {
+			(*this) = this->substr(1, pos - 1) + this->substr(pos + len, elem[0] - pos - len + 1);
+		}else {
+			(*this) = this->substr(1, pos - 1);
+		}
+	}
+	void erase_all(String a) {
+		//删除当前串中出现的所有串a
+		int pos=1;
+		//设置pos，避免多次从头便利，做到一边便利一边删除
+		while ((pos=this->find(a,pos))!= -1) {
+			this->erase(this->find(a), a.size());
+		}
+	}
+};
+/****************************************************/
+int main() {
+	String str;
+	str.getLine();
+	str.insert_all("朱成","朱军");
+	str.print();
+	return 0;
+}
