@@ -1,0 +1,19 @@
+#include<iostream>
+#include<ctime>
+using namespace std;
+int main() {
+	srand((unsigned int)time(NULL));
+	int num1 = (rand() + 1) % 100;
+	int num2;
+	while (1) {
+		cin >> num2;
+		if (num2 > num1) cout << "输入的数偏大";
+		else if (num2 < num1) cout << "输入的数偏小";
+		else {
+			cout << "猜测正确！";
+			break;
+		}
+	}
+	system("pause");
+	return 0;
+}
