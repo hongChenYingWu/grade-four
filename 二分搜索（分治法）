@@ -1,0 +1,17 @@
+#include<iostream>
+using namespace std;
+int binarySearch(int a[], const int& x, int n) {
+	int left = 0, right = n - 1;
+	while (left<=right) {
+		int middle = (left + right) / 2;
+		if (a[middle] == x) return middle;
+		else if (a[middle] < x) left = middle + 1;
+		else right = middle - 1;
+	}
+}
+int main() {
+	int a[] = { 1,2,3,4,5,6,7,9 };
+	cout << binarySearch(a, 5, 8);
+	system("pause");
+	return 0;
+}                            
